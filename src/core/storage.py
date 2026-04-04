@@ -14,14 +14,8 @@ STORAGE_CATALOGS = [
 
 
 def _init_dirs():
-    logger.info("Создание каталогов")
-
     base_path = Path(get_settings().STORAGE_PATH)
     base_path.mkdir(parents=True, exist_ok=True)
-
-    for catalog in STORAGE_CATALOGS:
-        logger.info(f"{(base_path / catalog)} [SUCCESS]")
-        (base_path / catalog).mkdir(exist_ok=True)
 
 
 async def initialize_storage():

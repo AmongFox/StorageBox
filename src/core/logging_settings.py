@@ -63,14 +63,15 @@ class ProjectLogger:
         console_handler.setFormatter(console_formatter)
         root_logger.addHandler(console_handler)
 
-        from src.core.settings import get_settings
-        noisy_loggers = get_settings().noisy_loggers_list
+        try:
+            from src.core.settings import get_settings
+            noisy_loggers = get_settings().noisy_loggers_list
 
-        telethon_logger = logging.getLogger("telethon")
-        telethon_logger.setLevel(logging.WARNING)
-
-        for logger_name in noisy_loggers:
-            logging.getLogger(logger_name).setLevel(logging.WARNING)
+            for logger_name in noisy_loggers:
+                logging.getLogger(logger_name).setLevel(logging.WARNING)
+                logging.getLogger(logger_name).propagate = False
+        except Exception:
+            pass
 
         root_logger.info("=" * 60)
         root_logger.info(

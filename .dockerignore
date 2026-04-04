@@ -1,0 +1,51 @@
+# Виртуальное окружение
+venv/
+.venv/
+
+# Python кэш
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Git
+.git/
+.gitignore
+
+# Qwen
+.qwen/
+
+# Логи
+logs/
+*.log
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yaml
+
+# Poetry (используем requirements.txt)
+poetry.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env файл
+.env.local
+
+# Тесты
+tests/
+test_*.py
+*_test.py
+
+# Документация
+*.md
+docs/
+
+# Временные файлы
+*.tmp
+*.bak

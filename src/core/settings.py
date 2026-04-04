@@ -1,9 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 from pydantic_settings import BaseSettings
-from pydantic import Field, field_validator
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -37,20 +37,34 @@ class Settings(BaseSettings):
 
     MAX_TOTAL_SIZE_FOR_USER_MB: int = 1024
 
-    ALLOWED_EXTENSIONS: List[str] = [
+    @property
+    def get_max_total_size_for_user_byte(self):
+        return self.MAX_TOTAL_SIZE_FOR_USER_MB * 1024 * 1024
+
+    @property
+    def get_max_files_size_byte(self):
+        return {
+            "file": self.MAX_FILE_SIZE_MB * 1024 * 1024,
+            "document": self.MAX_DOCUMENT_SIZE_MB * 1024 * 1024,
+            "archive": self.MAX_ARCHIVE_SIZE_MB * 1024 * 1024,
+            "image": self.MAX_IMAGE_SIZE_MB * 1024 * 1024,
+            "video": self.MAX_VIDEO_SIZE_MB * 1024 * 1024,
+            "audio": self.MAX_AUDIO_SIZE_MB * 1024 * 1024
+        }
+
+    ALLOWED_EXTENSIONS: Dict[str, List[str]] = {
         # Документы
-        ".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt",
-        ".xls", ".xlsx", ".ods", ".csv",
-        ".ppt", ".pptx", ".odp",
+        "documents": [".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".xls",
+                      ".xlsx", ".ods", ".csv", ".ppt", ".pptx", ".odp", ".log"],
         # Архивы
-        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
+        "archives": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"],
         # Изображения
-        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".heic",
+        "images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".heic"],
         # Видео
-        ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v",
+        "video": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
         # Аудио
-        ".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"
-    ]
+        "audio": [".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"]
+    }
 
     # === === ИНТЕГРАЦИЯ СЕРВИСОВ === ===
 

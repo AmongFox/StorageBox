@@ -1,4 +1,6 @@
+from pathlib import Path
 from typing import Optional
+from uuid import UUID
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +38,7 @@ class UserCRUD:
         logger.debug(f"Успешно (User={user})")
         return user
 
-    async def get_by_id(self, user_id: int) -> Optional[User]:
+    async def get_by_id(self, user_id: UUID) -> Optional[User]:
         logger.debug(f"Получение пользователя (user_id={user_id})")
         result = await self.session.execute(select(User).where(User.id == user_id))
         logger.debug(f"Успешно (User={result})")
@@ -50,9 +52,8 @@ class UserCRUD:
 
     async def update(
         self,
-        user_id: int,
+        user_id: UUID,
         username: Optional[str] = None,
-        email: Optional[str] = None,
         is_active: Optional[bool] = None
     ):
         logger.debug(f"Обновление пользователя (user_id={user_id})")
@@ -60,8 +61,6 @@ class UserCRUD:
 
         if username is not None:
             update_data["username"] = username
-        if email is not None:
-            update_data["email"] = email
         if is_active is not None:
             update_data["is_active"] = is_active
 
@@ -76,7 +75,15 @@ class UserCRUD:
         logger.debug(f"Успешно (User={result})")
         return result.scalar_one_or_none()
 
-    async def delete(self, user_id: int) -> bool:
+    async def increase_storage_used(self, user_id: UUID, size_bytes: int) -> bool:
+        user = await self.get_by_id(user_id)
+        if user.storage_used + size_bytes > user.storage_limit:
+            return False
+        user.storage_used += size_bytes
+        await self.session.flush()
+        return True
+
+    async def delete(self, user_id: UUID) -> bool:
         logger.debug(f"Удаление пользователя (user_id={user_id})")
         user = await self.get_by_id(user_id)
 
@@ -102,20 +109,22 @@ class FileCRUD:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             await self.session.rollback()
-        else:
-            await self.session.commit()
+        # else:
+        #     await self.session.commit()
         return False
 
     async def create(
         self,
+        owner_id: UUID,
         filename: str,
         file_path: str,
-        file_size: str,
+        file_size: int,
         file_category: str,
         file_extension: str,
     ):
         logger.debug(f"Запись файла (filename={filename})")
         file = File(
+            owner_id=owner_id,
             filename=filename,
             file_path=file_path,
             file_size=file_size,
@@ -130,7 +139,7 @@ class FileCRUD:
         logger.debug(f"Успешно (File={file})")
         return file
 
-    async def get_by_id(self, file_id: int) -> Optional[File]:
+    async def get_by_id(self, file_id: UUID) -> Optional[File]:
         logger.debug(f"Получение файла (file_id={file_id})")
         result = await self.session.execute(select(File).where(File.id == file_id))
         logger.debug(f"Успешно (File={result})")
@@ -138,7 +147,7 @@ class FileCRUD:
 
     async def update(
             self,
-            file_id: int,
+            file_id: UUID,
             filename: Optional[str] = None,
             file_path: Optional[str] = None,
             file_size: Optional[str] = None,
@@ -170,7 +179,7 @@ class FileCRUD:
         logger.debug(f"Успешно (File={result})")
         return result.scalar_one_or_none()
 
-    async def delete(self, file_id: int) -> bool:
+    async def delete(self, file_id: UUID) -> bool:
         logger.debug(f"Удаление файла (file_id={file_id})")
         file = await self.get_by_id(file_id)
 
