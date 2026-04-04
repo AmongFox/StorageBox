@@ -6,6 +6,8 @@ import uvicorn
 from src.core import get_logger, initialize_storage
 from src.database import migration, get_engine, close_db
 
+from src.app.api import files_router
+
 logger = get_logger()
 
 
@@ -28,7 +30,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+app.include_router(files_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run("src.app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.app.main:app", host="0.0.0.0", port=8001, reload=True)
