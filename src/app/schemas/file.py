@@ -23,6 +23,7 @@ class FileInfoResponse(BaseModel):
     file_size: int
     file_category: str
     created_at: datetime
+    expires_at: Optional[datetime] = None
     owner_id: uuid.UUID
 
     class Config:

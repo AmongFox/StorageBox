@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, ScalarResult, Row, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core import get_logger
@@ -27,9 +28,9 @@ class UserCRUD:
             await self.session.commit()
         return False
 
-    async def create(self, username: str) -> User:
-        logger.debug(f"Запись пользователя (username={username})")
-        user = User(username=username)
+    async def create(self, user_id: UUID, username: str) -> User:
+        logger.debug(f"Запись пользователя (user_id={user_id}; username={username})")
+        user = User(id=user_id, username=username)
 
         self.session.add(user)
         await self.session.flush()
@@ -83,6 +84,14 @@ class UserCRUD:
         await self.session.flush()
         return True
 
+    async def decrement_storage_used(self, user_id: UUID, size_bytes: int) -> bool:
+        user = await self.get_by_id(user_id)
+        if user.storage_used - size_bytes < 0:
+            return False
+        user.storage_used -= size_bytes
+        await self.session.flush()
+        return True
+
     async def delete(self, user_id: UUID) -> bool:
         logger.debug(f"Удаление пользователя (user_id={user_id})")
         user = await self.get_by_id(user_id)
@@ -109,8 +118,8 @@ class FileCRUD:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             await self.session.rollback()
-        # else:
-        #     await self.session.commit()
+        else:
+            await self.session.commit()
         return False
 
     async def create(
@@ -121,6 +130,7 @@ class FileCRUD:
         file_size: int,
         file_category: str,
         file_extension: str,
+        expires_at: Optional[datetime] = None
     ):
         logger.debug(f"Запись файла (filename={filename})")
         file = File(
@@ -129,7 +139,8 @@ class FileCRUD:
             file_path=file_path,
             file_size=file_size,
             file_category=file_category,
-            file_extension=file_extension
+            file_extension=file_extension,
+            expires_at=expires_at
         )
 
         self.session.add(file)
@@ -144,6 +155,25 @@ class FileCRUD:
         result = await self.session.execute(select(File).where(File.id == file_id))
         logger.debug(f"Успешно (File={result})")
         return result.scalar_one_or_none()
+
+    async def get_files_by_user_id(self, user_id: UUID) -> Sequence[File]:
+        logger.debug(f"Получение списка файлов пользователя (user_id={user_id})")
+        result = await self.session.execute(select(File).where(File.owner_id == user_id))
+        logger.debug(f"Успешно (File={result})")
+        return result.scalars().all()
+
+    async def get_expired(self):
+        logger.debug("Получение просроченных файлов")
+        now = datetime.now(timezone.utc)
+        result = await self.session.execute(
+            select(File).where(
+                File.expires_at.isnot(None),
+                File.expires_at < now
+            )
+        )
+        files = list(result.scalars().all())
+        logger.debug(f"Успешно. Найдено: {len(files)}")
+        return files
 
     async def update(
             self,

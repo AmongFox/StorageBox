@@ -1,5 +1,6 @@
 import hashlib
 import os.path
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 from uuid import UUID
@@ -53,10 +54,12 @@ def _from_bytes_to_mb(size: int):
 async def upload_file(
         file: UploadFile = FastApiFile(...),
         user_id: Optional[UUID] = Form(...),
+        expires_at: Optional[datetime] = Form(None),
         session: AsyncSession = Depends(get_session),
         file_crud: FileCRUD = Depends(get_file_crud),
-        user_crud: UserCRUD = Depends(get_user_crud)
+        user_crud: UserCRUD = Depends(get_user_crud),
 ):
+    logger.info(f"EXPIRES_AT: {expires_at}")
     """
     Роутер загрузки файла.
     Формат: storage/user_<username>/<category>/<filename>
@@ -85,11 +88,20 @@ async def upload_file(
             detail=f"Размер файла ({round(_from_bytes_to_mb(file_size), 3)} MB) превышает лимит ({settings.MAX_FILE_SIZE_MB} MB)"
         )
 
+    if expires_at:
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at < datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Срок действия не может быть в прошлом"
+            )
+
     user = await user_crud.get_by_id(user_id)
 
     if not user:
         logger.info(f"Пользователь {user_id} не найден")
-        user = await user_crud.create(username=str(user_id))
+        user = await user_crud.create(user_id=user_id, username=f"user_{str(user_id)[:12]}")
         await session.commit()
         user_id = user.id
         logger.info(f"Создан новый пользователь (user={user})")
@@ -139,7 +151,8 @@ async def upload_file(
             file_path=str(file_path),
             file_size=file_size,
             file_category=file_category,
-            file_extension=file_extension
+            file_extension=file_extension,
+            expires_at=expires_at
         )
 
         db_file.md5_hash = md5_hash
@@ -160,8 +173,9 @@ async def upload_file(
         "file_size": file_size,
         "file_category": file_category,
         "file_extension": file_extension,
-        "owner_id": str(db_file.owner_id),
-        "created_at": db_file.created_at.isoformat() if db_file.created_at else None
+        "created_at": db_file.created_at.isoformat() if db_file.created_at else None,
+        "expires_at": db_file.expires_at.isoformat() if db_file.expires_at else None,
+        "owner_id": str(db_file.owner_id)
     }
 
 
@@ -189,6 +203,7 @@ async def get_file(
         file_crud: FileCRUD = Depends(get_file_crud)
 ):
     """Получить информацию о файле"""
+    logger.info(f"Запрос на получение информации о файле (file_id={file_id})")
     file = await file_crud.get_by_id(file_id)
 
     if not file:

@@ -3,10 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import uvicorn
 
+from core import scheduler
 from src.core import get_logger, initialize_storage
 from src.database import migration, get_engine, close_db
 
-from src.app.api import files_router
+from src.app.api import files_router, users_router
 
 logger = get_logger()
 
@@ -17,6 +18,8 @@ async def lifespan(app: FastAPI):
     await migration()
     await initialize_storage()
     await get_engine()
+
+    scheduler.start()
 
     yield
 
@@ -31,6 +34,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 app.include_router(files_router)
+app.include_router(users_router)
 
 
 if __name__ == "__main__":

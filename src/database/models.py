@@ -53,5 +53,6 @@ class File(Base):
     # === ВРЕМЕННЫЕ МЕТКИ ===
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    expires_at = Column(DateTime(timezone=True), default=None, nullable=True)
 
     owner = relationship("User", back_populates="files")
