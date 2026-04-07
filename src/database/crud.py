@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, List, Optional, Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import Row, RowMapping, ScalarResult, select, update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core import get_logger

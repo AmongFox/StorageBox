@@ -2,8 +2,8 @@ from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from core import get_logger
-from database import FileCRUD, UserCRUD, get_session_factory
+from src.core import get_logger
+from src.database import FileCRUD, UserCRUD, get_session_factory
 
 logger = get_logger()
 scheduler = AsyncIOScheduler()

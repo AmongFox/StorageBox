@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from core import scheduler
+from src.core.scheduler import scheduler
 from src.app.api import files_router, users_router
 from src.core import get_logger, initialize_storage
 from src.database import close_db, get_engine, migration

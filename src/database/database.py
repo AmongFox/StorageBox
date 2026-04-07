@@ -21,12 +21,14 @@ Base = declarative_base()
 
 IS_WINDOWS = sys.platform == "win32"
 
+settings = get_settings()
+
 
 @lru_cache
 def get_db_config():
     """Получает настройки БД только когда они действительно нужны"""
     return {
-        "url": get_settings().database_url,
+        "url": settings.database_url,
         "debug": False,
         "pool_config": get_pool_config(),
     }
@@ -44,11 +46,11 @@ def get_pool_config():
         }
     else:
         return {
-            "pool_size": 10,
-            "max_overflow": 20,
+            "pool_size": settings.DB_POOL_SIZE,
+            "max_overflow": settings.DB_MAX_OVERFLOW,
             "pool_pre_ping": True,
-            "pool_recycle": 3600,  # 1 час
-            "pool_timeout": 30,
+            "pool_recycle": settings.DB_POOL_RECYCLE,
+            "pool_timeout": settings.DB_POOL_TIMEOUT,
         }
 
 
@@ -64,18 +66,18 @@ async def get_engine():
 
         engine_kwargs = {
             "future": True,
-            "echo": False,
+            "echo": settings.DB_ECHO,
             "echo_pool": False,
             **db_config["pool_config"],
         }
 
         if "postgresql" in db_config["url"]:
             engine_kwargs["connect_args"] = {
-                "command_timeout": 60,
+                "command_timeout": settings.DB_COMMAND_TIMEOUT,
                 "server_settings": {
-                    "application_name": "storagebox",
-                    "statement_timeout": "30000",
-                    "lock_timeout": "10000",
+                    "application_name": settings.DB_APPLICATION_NAME,
+                    "statement_timeout": settings.DB_STATEMENT_TIMEOUT,
+                    "lock_timeout": settings.DB_LOCK_TIMEOUT,
                 },
             }
 
@@ -134,7 +136,7 @@ async def migration():
     alembic_dir = root_dir / "alembic"
 
     alembic_cfg = AlembicConfig(str(alembic_ini))
-    alembic_cfg.set_main_option("sqlalchemy.url", get_settings().database_url)
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
     alembic_cfg.set_main_option("script_location", str(alembic_dir))
     command.upgrade(alembic_cfg, "head")
     logger.info("Миграции успешно применены")

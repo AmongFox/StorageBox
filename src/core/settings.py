@@ -23,6 +23,22 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
+    # = DB POOL =
+    DB_POOL_SIZE: int = Field(default=10)
+    DB_MAX_OVERFLOW: int = Field(default=20)
+    DB_POOL_RECYCLE: int = Field(default=3600)
+    DB_POOL_TIMEOUT: int = Field(default=30)
+    DB_COMMAND_TIMEOUT: int = Field(default=60)
+    DB_STATEMENT_TIMEOUT: int = Field(default=30000)
+    DB_LOCK_TIMEOUT: int = Field(default=10000)
+    DB_ECHO: bool = Field(default=False)
+    DB_APPLICATION_NAME: str = Field(default="storagebox")
+
+    # === UVICORN ===
+    UVICORN_PORT: int = Field(default=8001)
+    UVICORN_HOST: str = Field(default="0.0.0.0")
+    UVICORN_RELOAD: bool = Field(default=False)
+
     # === ХРАНИЛИЩЕ ФАЙЛОВ ===
     STORAGE_TYPE: str = "local"
     STORAGE_PATH: Path = Path(__file__).parents[2] / "storage"
@@ -69,6 +85,7 @@ class Settings(BaseSettings):
             ".pptx",
             ".odp",
             ".log",
+            ".rf",
         ],
         # Архивы
         "archives": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"],
@@ -95,6 +112,7 @@ class Settings(BaseSettings):
 
     # === ЛОГГЕР ===
     NOISY_LOGGERS: str = ""
+    LOGGER_LEVEL: str = Field(default="INFO")
 
     @property
     def noisy_loggers_list(self) -> List[str]:
