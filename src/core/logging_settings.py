@@ -65,6 +65,7 @@ class ProjectLogger:
 
         try:
             from src.core.settings import get_settings
+
             noisy_loggers = get_settings().noisy_loggers_list
 
             for logger_name in noisy_loggers:

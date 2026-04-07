@@ -1,15 +1,18 @@
-import os
 import sys
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from alembic import command
-from alembic.config import Config as AlembicConfig
-
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import declarative_base
 
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from src.core import get_logger, get_settings
 
 logger = get_logger()

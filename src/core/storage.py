@@ -1,16 +1,10 @@
 from pathlib import Path
 
-from src.core import get_settings, get_logger
+from src.core import get_logger, get_settings
 
 logger = get_logger()
 
-STORAGE_CATALOGS = [
-    "documents",
-    "archives",
-    "images",
-    "video",
-    "audio"
-]
+STORAGE_CATALOGS = ["documents", "archives", "images", "video", "audio"]
 
 
 def _init_dirs():

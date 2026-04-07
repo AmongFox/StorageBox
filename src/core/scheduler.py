@@ -42,5 +42,5 @@ scheduler.add_job(
     "interval",
     hours=1,
     id="cleanup_expired_files",
-    replace_existing=True
+    replace_existing=True,
 )

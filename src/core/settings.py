@@ -1,9 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = Field(default="5432")
     POSTGRES_DB: str = Field(default="StorageBox")
     POSTGRES_USER: str = Field(default="postgres")
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: str = Field(default="admin")
 
     @property
     def database_url(self) -> str:
@@ -49,21 +49,46 @@ class Settings(BaseSettings):
             "archive": self.MAX_ARCHIVE_SIZE_MB * 1024 * 1024,
             "image": self.MAX_IMAGE_SIZE_MB * 1024 * 1024,
             "video": self.MAX_VIDEO_SIZE_MB * 1024 * 1024,
-            "audio": self.MAX_AUDIO_SIZE_MB * 1024 * 1024
+            "audio": self.MAX_AUDIO_SIZE_MB * 1024 * 1024,
         }
 
     ALLOWED_EXTENSIONS: Dict[str, List[str]] = {
         # Документы
-        "documents": [".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".xls",
-                      ".xlsx", ".ods", ".csv", ".ppt", ".pptx", ".odp", ".log"],
+        "documents": [
+            ".pdf",
+            ".doc",
+            ".docx",
+            ".txt",
+            ".rtf",
+            ".odt",
+            ".xls",
+            ".xlsx",
+            ".ods",
+            ".csv",
+            ".ppt",
+            ".pptx",
+            ".odp",
+            ".log",
+        ],
         # Архивы
         "archives": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"],
         # Изображения
-        "images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".heic"],
+        "images": [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".svg",
+            ".webp",
+            ".ico",
+            ".tiff",
+            ".heic",
+        ],
         # Видео
         "video": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
         # Аудио
-        "audio": [".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"]
+        "audio": [".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"],
     }
 
     # === === ИНТЕГРАЦИЯ СЕРВИСОВ === ===

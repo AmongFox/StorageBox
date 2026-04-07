@@ -1,13 +1,12 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
 import uvicorn
+from fastapi import FastAPI
 
 from core import scheduler
-from src.core import get_logger, initialize_storage
-from src.database import migration, get_engine, close_db
-
 from src.app.api import files_router, users_router
+from src.core import get_logger, initialize_storage
+from src.database import close_db, get_engine, migration
 
 logger = get_logger()
 
@@ -31,7 +30,7 @@ app = FastAPI(
     title="StorageBox",
     description="Сервис управления файловым хранилищем",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 app.include_router(files_router)
 app.include_router(users_router)
