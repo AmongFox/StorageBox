@@ -1,8 +1,13 @@
+<img src="assets/StorageBox_logo_mini.png" alt="Logo" height="200" width="300"/>
+
 # StorageBox
 
 > **Асинхронный сервис управления файловым хранилищем** на FastAPI с автоматической очисткой просроченных файлов, квотированием и хешированием.
 
 ---
+[![FastAPI](https://img.shields.io/badge/FastAPI-%23D936C0?style=flat-square)](https://pypi.org/project/fastapi/)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-%2333CCCC)](https://python.org)
+
 
 ## 📋 Содержание
 
