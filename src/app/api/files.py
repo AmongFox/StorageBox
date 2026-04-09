@@ -2,6 +2,7 @@ import hashlib
 import os.path
 from datetime import datetime, timezone
 from pathlib import Path
+from time import sleep
 from typing import Optional
 from uuid import UUID
 
@@ -95,7 +96,7 @@ async def upload_file(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Размер файла ({round(_from_bytes_to_mb(file_size), 3)} MB)"
-                   f" превышает лимит ({settings.MAX_FILE_SIZE_MB} MB)",
+            f" превышает лимит ({settings.MAX_FILE_SIZE_MB} MB)",
         )
 
     if expires_at:
@@ -122,7 +123,7 @@ async def upload_file(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Превышен лимит хранилища. Использовано: {_from_bytes_to_mb(user.storage_used)} MB"
-                   f" из {_from_bytes_to_mb(user.storage_limit)} MB",
+            f" из {_from_bytes_to_mb(user.storage_limit)} MB",
         )
 
     md5_hash, sha256_hash = _calculate_file_hashes(content)
@@ -132,19 +133,22 @@ async def upload_file(
 
     iterable = 0
     while True:
+        logger.info(f"Iteration: {iterable}")
         name_without_ext = Path(filename).stem
 
         new_filename = f"{md5_hash[:8]}_{name_without_ext}"
 
         if iterable > 0:
-            filename += f"_{iterable}"
+            new_filename += f"_{iterable}"
         new_filename += file_extension
 
         file_path = Path(storage_path / new_filename)
+        logger.info(f"Filepath: {file_path}")
 
         if not file_path.exists():
             break
         iterable += 1
+        sleep(5)
 
     logger.info(f"Путь сохранения: {file_path}")
 

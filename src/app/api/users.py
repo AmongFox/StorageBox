@@ -1,10 +1,9 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
 
-from src.app.schemas import FileInfoResponse
+from src.app.schemas import FileListResponse
 from src.core import get_logger
 from src.database import FileCRUD, UserCRUD, get_file_crud, get_user_crud
 
@@ -14,7 +13,7 @@ logger = get_logger()
 
 @router.get(
     "/{user_id}/files",
-    response_model=List[FileInfoResponse],
+    response_model=FileListResponse,
     status_code=status.HTTP_200_OK,
 )
 async def get_files_by_user_id(
@@ -25,7 +24,6 @@ async def get_files_by_user_id(
     """Получить информацию о всех файлах пользователя"""
     logger.info(f"Запрос на получение файлов пользователя (user_id={user_id})")
     user = await user_crud.get_by_id(user_id)
-    logger.debug(user)
 
     if not user:
         raise HTTPException(
@@ -47,7 +45,7 @@ async def get_files_by_user_id(
         }
         files_data.append(data)
 
-    return {"files": files_data, "count": len(db_files), "owner_id": user_id}
+    return {"files": files_data, "total": len(db_files)}
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_200_OK)

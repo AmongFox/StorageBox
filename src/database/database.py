@@ -16,12 +16,11 @@ from alembic.config import Config as AlembicConfig
 from src.core import get_logger, get_settings
 
 logger = get_logger()
+settings = get_settings()
 
 Base = declarative_base()
 
 IS_WINDOWS = sys.platform == "win32"
-
-settings = get_settings()
 
 
 @lru_cache
@@ -76,8 +75,8 @@ async def get_engine():
                 "command_timeout": settings.DB_COMMAND_TIMEOUT,
                 "server_settings": {
                     "application_name": settings.DB_APPLICATION_NAME,
-                    "statement_timeout": settings.DB_STATEMENT_TIMEOUT,
-                    "lock_timeout": settings.DB_LOCK_TIMEOUT,
+                    "statement_timeout": str(settings.DB_STATEMENT_TIMEOUT),
+                    "lock_timeout": str(settings.DB_LOCK_TIMEOUT),
                 },
             }
 
