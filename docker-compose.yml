@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: storagebox-app
     ports:
-      - "8000:8000"
+      - "8001:8001"
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
