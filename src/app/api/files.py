@@ -2,7 +2,6 @@ import hashlib
 import os.path
 from datetime import datetime, timezone
 from pathlib import Path
-from time import sleep
 from typing import Optional
 from uuid import UUID
 
@@ -133,7 +132,6 @@ async def upload_file(
 
     iterable = 0
     while True:
-        logger.info(f"Iteration: {iterable}")
         name_without_ext = Path(filename).stem
 
         new_filename = f"{md5_hash[:8]}_{name_without_ext}"
@@ -143,12 +141,10 @@ async def upload_file(
         new_filename += file_extension
 
         file_path = Path(storage_path / new_filename)
-        logger.info(f"Filepath: {file_path}")
 
         if not file_path.exists():
             break
         iterable += 1
-        sleep(5)
 
     logger.info(f"Путь сохранения: {file_path}")
 
