@@ -1,0 +1,172 @@
+{
+  "info": {
+    "_postman_id": "0c9b10f5-0233-4f1b-95ff-c92526521a78",
+    "name": "StorageBox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30860046"
+  },
+  "item": [
+    {
+      "name": "Загрузка файлов",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "user_id",
+              "value": "{{user_id}}",
+              "type": "text",
+              "uuid": "e9f727bc-5331-4a46-a247-5650fd6f11cb"
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "uuid": "de96a591-2253-4b91-9ae4-f9419de80e62",
+              "src": "/A:/Downoload Module/Downloads/photo_2025-08-24_14-35-32.jpg"
+            },
+            {
+              "key": "expires_at",
+              "value": "2026-04-04T20:45:23",
+              "type": "text",
+              "uuid": "61868758-594a-401c-bd45-99d11eb78d95",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8001/files/upload",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "files",
+            "upload"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Информация о файле",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/files/{{file_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "files",
+            "{{file_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Скачать файл",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/files/{{file_id}}/download",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "files",
+            "{{file_id}}",
+            "download"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Удаление файла",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/files/{{file_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "files",
+            "{{file_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Получение файлов пользователя",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{address}}/users/{{user_id}}/files",
+          "host": [
+            "{{address}}"
+          ],
+          "path": [
+            "users",
+            "{{user_id}}",
+            "files"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "address",
+      "value": ""
+    },
+    {
+      "key": "file_id",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    }
+  ]
+}
