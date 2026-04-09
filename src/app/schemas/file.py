@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 
 class FileCreate(BaseModel):
@@ -23,6 +23,7 @@ class FileInfoResponse(BaseModel):
     file_size: int
     file_category: str
     created_at: datetime
+    expires_at: Optional[datetime] = None
     owner_id: uuid.UUID
 
     class Config:

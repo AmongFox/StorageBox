@@ -1,9 +1,12 @@
 import uuid
-from sqlalchemy import Column, ForeignKey, String, BigInteger, DateTime, func, Boolean
-from sqlalchemy.orm import relationship
+from datetime import datetime
+
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.core import get_settings
+
 from .database import Base
 
 
@@ -12,46 +15,66 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     # === ПЕРСОНАЛЬНЫЕ ДАННЫЕ ===
-    username = Column(String(255), nullable=False, index=True)
+    username: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
 
     # === КВОТЫ / ЛИМИТЫ ===
-    storage_used = Column(BigInteger, default=0)
-    storage_limit = Column(BigInteger, nullable=False, default=get_settings().MAX_TOTAL_SIZE_FOR_USER_MB * 1024 * 1024)
+    storage_used: Mapped[int] = mapped_column(BigInteger, default=0)
+    storage_limit: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        default=get_settings().MAX_TOTAL_SIZE_FOR_USER_MB * 1024 * 1024,
+    )
 
     # === ВРЕМЕННЫЕ МЕТКИ ===
-    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now(), nullable=False, index=True
+    )
 
     # === БЕЗОПАСНОСТЬ ===
-    is_active = Column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    files = relationship("File", back_populates="owner")
+    files: Mapped[list["File"]] = relationship("File", back_populates="owner")
 
 
 class File(Base):
     """Модель файлов системы"""
+
     __tablename__ = "files"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
 
     # === МЕТАДАННЫЕ ===
-    filename = Column(String(255), nullable=False)
-    file_path = Column(String(500), nullable=False)
-    file_size = Column(BigInteger, nullable=False)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
     # === КАТЕГОРИЯ / РАСШИРЕНИЕ ===
-    file_category = Column(String(20), nullable=False)
-    file_extension = Column(String(10), nullable=False)
+    file_category: Mapped[str] = mapped_column(String(20), nullable=False)
+    file_extension: Mapped[str] = mapped_column(String(10), nullable=False)
 
     # === ХЕШ ===
-    md5_hash = Column(String(32), nullable=True, index=True)
-    sha256_hash = Column(String(64), nullable=True)
+    md5_hash: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    sha256_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # === ВРЕМЕННЫЕ МЕТКИ ===
-    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
-    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now(), nullable=False, index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now(), onupdate=func.now()
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None, nullable=True
+    )
 
-    owner = relationship("User", back_populates="files")
+    owner: Mapped["User"] = relationship("User", back_populates="files")

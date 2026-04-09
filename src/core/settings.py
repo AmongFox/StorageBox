@@ -1,9 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -17,11 +17,27 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = Field(default="5432")
     POSTGRES_DB: str = Field(default="StorageBox")
     POSTGRES_USER: str = Field(default="postgres")
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: str = Field(default="admin")
 
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
+    # = DB POOL =
+    DB_POOL_SIZE: int = Field(default=10)
+    DB_MAX_OVERFLOW: int = Field(default=20)
+    DB_POOL_RECYCLE: int = Field(default=3600)
+    DB_POOL_TIMEOUT: int = Field(default=30)
+    DB_COMMAND_TIMEOUT: int = Field(default=60)
+    DB_STATEMENT_TIMEOUT: int = Field(default=30000)
+    DB_LOCK_TIMEOUT: int = Field(default=10000)
+    DB_ECHO: bool = Field(default=False)
+    DB_APPLICATION_NAME: str = Field(default="storagebox")
+
+    # === UVICORN ===
+    UVICORN_PORT: int = Field(default=8001)
+    UVICORN_HOST: str = Field(default="0.0.0.0")
+    UVICORN_RELOAD: bool = Field(default=False)
 
     # === ХРАНИЛИЩЕ ФАЙЛОВ ===
     STORAGE_TYPE: str = "local"
@@ -49,27 +65,54 @@ class Settings(BaseSettings):
             "archive": self.MAX_ARCHIVE_SIZE_MB * 1024 * 1024,
             "image": self.MAX_IMAGE_SIZE_MB * 1024 * 1024,
             "video": self.MAX_VIDEO_SIZE_MB * 1024 * 1024,
-            "audio": self.MAX_AUDIO_SIZE_MB * 1024 * 1024
+            "audio": self.MAX_AUDIO_SIZE_MB * 1024 * 1024,
         }
 
     ALLOWED_EXTENSIONS: Dict[str, List[str]] = {
         # Документы
-        "documents": [".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".xls",
-                      ".xlsx", ".ods", ".csv", ".ppt", ".pptx", ".odp", ".log"],
+        "documents": [
+            ".pdf",
+            ".doc",
+            ".docx",
+            ".txt",
+            ".rtf",
+            ".odt",
+            ".xls",
+            ".xlsx",
+            ".ods",
+            ".csv",
+            ".ppt",
+            ".pptx",
+            ".odp",
+            ".log",
+            ".rf",
+        ],
         # Архивы
         "archives": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"],
         # Изображения
-        "images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".heic"],
+        "images": [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".svg",
+            ".webp",
+            ".ico",
+            ".tiff",
+            ".heic",
+        ],
         # Видео
         "video": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
         # Аудио
-        "audio": [".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"]
+        "audio": [".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"],
     }
 
     # === === ИНТЕГРАЦИЯ СЕРВИСОВ === ===
 
     # === ЛОГГЕР ===
     NOISY_LOGGERS: str = ""
+    LOGGER_LEVEL: str = Field(default="INFO")
 
     @property
     def noisy_loggers_list(self) -> List[str]:
